@@ -1,0 +1,17 @@
+# TOKEN
+slack_bot_token.py
+
+# pycache
+__pycache__/
+
+# Virtual Environmet
+.env/
+
+# Temporary Files
+temp*
+
+# Service Files
+*.service
+
+# Remove template.service
+!template.service

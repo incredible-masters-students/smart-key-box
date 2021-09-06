@@ -1,0 +1,10 @@
+[Unit]
+Description = test
+
+[Service]
+ExecStart=/home/pi/key-and-rpi/.env/bin/python3 /home/pi/key-and-rpi/service_test.py
+Restart=always
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
