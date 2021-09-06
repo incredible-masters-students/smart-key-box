@@ -1,4 +1,4 @@
-# Key and Rpi
+# Smart Key Box
 
 ## Preparation
 
