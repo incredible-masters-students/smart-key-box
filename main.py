@@ -7,31 +7,7 @@ from post_message import SlackMessage
 from slack_bot_token import SLACK_BOT_TOKEN, CHANNEL_ID
 
 
-class KeyRack:
-    def __init__(
-        self, keyrack_gpio: int,
-        keyrack_name: str,
-        max_i: int
-    ) -> None:
-        self.keyrack_button = Button(keyrack_gpio)
-        self.keyrack_name = keyrack_name
-
-        self.count_pressed = [0 for _ in range(max_i)]
-        self.has_key = True
-
-    def create_slack_message(self, person_name: str) -> None:
-        if self.has_key is True:
-            removed_or_placed = "placed"
-        else:
-            removed_or_placed = "removed"
-        message = (
-            f"{person_name} {removed_or_placed} the key: "
-            f"{self.keyrack_name}."
-        )
-        return message
-
-
-def main(do_send_slack_msg) -> None:
+def main(do_send_slack_msg: bool) -> None:
     sleep_sec = 0.1
     threshold_rate = 0.8  # has_keyを切り替えるしきい値
     max_i = 10
@@ -85,6 +61,30 @@ def main(do_send_slack_msg) -> None:
         # print(count_pressed)
 
         sleep(sleep_sec)
+
+
+class KeyRack:
+    def __init__(
+        self, keyrack_gpio: int,
+        keyrack_name: str,
+        max_i: int
+    ) -> None:
+        self.keyrack_button = Button(keyrack_gpio)
+        self.keyrack_name = keyrack_name
+
+        self.count_pressed = [0 for _ in range(max_i)]
+        self.has_key = True
+
+    def create_slack_message(self, person_name: str) -> str:
+        if self.has_key is True:
+            removed_or_placed = "placed"
+        else:
+            removed_or_placed = "removed"
+        message = (
+            f"{person_name} {removed_or_placed} the key: "
+            f"{self.keyrack_name}."
+        )
+        return message
 
 
 if __name__ == "__main__":
