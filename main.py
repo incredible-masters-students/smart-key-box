@@ -1,62 +1,91 @@
 import statistics
 from time import sleep
 
-from get_button_status import ButtonStatus
+from gpiozero import Button
+
 from post_message import SlackMessage
 from slack_bot_token import SLACK_BOT_TOKEN, CHANNEL_ID
 
 
-class KeyAndRpi:
-    def __init__(self, do_send_slack_msg: bool = True) -> None:
-        self.bs = ButtonStatus()
-        self.sm = SlackMessage(SLACK_BOT_TOKEN, CHANNEL_ID)
-        self.do_send_slack_msg = do_send_slack_msg
+class KeyRack:
+    def __init__(
+        self, keyrack_gpio: int,
+        keyrack_name: str,
+        max_i: int
+    ) -> None:
+        self.keyrack_button = Button(keyrack_gpio)
+        self.keyrack_name = keyrack_name
 
-    def main(self) -> None:
-        i = 0
-        max_i = 10
-        has_key = True
-        count_pressed = [0 for _ in range(max_i)]
-        sleep_sec = 0.1
-        threshold_rate = 0.8  # has_keyを切り替えるしきい値
+        self.count_pressed = [0 for _ in range(max_i)]
+        self.has_key = True
 
-        while True:
-            if self.bs.get_button_status():
-                count_pressed[i] = 1
-            else:
-                count_pressed[i] = 0
-
-            if has_key is True and \
-                    statistics.mean(count_pressed) < (1 - threshold_rate):
-                has_key = False
-                self.send_slack_message(has_key)
-            elif has_key is False and \
-                    statistics.mean(count_pressed) > threshold_rate:
-                has_key = True
-                self.send_slack_message(has_key)
-
-            i += 1
-            if i == max_i:
-                i = 0
-            # print(i)
-            # print(count_pressed)
-
-            sleep(sleep_sec)
-
-    def send_slack_message(self, has_key: bool) -> None:
-        name = "Alice"  # Get Bluetooth Info
-        if has_key is True:
+    def create_slack_message(self, person_name: str) -> None:
+        if self.has_key is True:
             removed_or_placed = "placed"
         else:
             removed_or_placed = "removed"
-        msg = f"{name} {removed_or_placed} the key."
+        message = (
+            f"{person_name} {removed_or_placed} the key: "
+            f"{self.keyrack_name}."
+        )
+        return message
 
-        if self.do_send_slack_msg:
-            self.sm.post_message(msg)
-        else:
-            print(msg)
+
+def main(do_send_slack_msg) -> None:
+    sleep_sec = 0.1
+    threshold_rate = 0.8  # has_keyを切り替えるしきい値
+    max_i = 10
+
+    slack_message = SlackMessage(SLACK_BOT_TOKEN, CHANNEL_ID)
+    keyracks_list = [
+        KeyRack(keyrack_gpio=2, keyrack_name="keyrack_2", max_i=max_i)
+    ]
+
+    i = 0
+    while True:
+        for keyrack in keyracks_list:
+            if keyrack.keyrack_button.is_pressed:
+                keyrack.count_pressed[i] = 1
+            else:
+                keyrack.count_pressed[i] = 0
+
+        for keyrack in keyracks_list:
+            # count_pressedの平均値を取得する．
+            avg_count_pressed = statistics.mean(keyrack.count_pressed)
+
+            # 鍵が外されたと判定した場合，has_keyをFalseにする．
+            if keyrack.has_key is True and \
+                    avg_count_pressed < (1 - threshold_rate):
+                keyrack.has_key = False
+
+            # 鍵が付けられたと判定した場合，has_keyをTrueにする．
+            elif keyrack.has_key is False and \
+                    avg_count_pressed > threshold_rate:
+                keyrack.has_key = True
+
+            # has_keyが変わらない場合，continueする．
+            else:
+                continue
+
+            # has_keyが変わった場合は，
+            # Bluetooth情報の受信とSlackへの送信を行う．
+            person_name = "Alice"  # Get bluetooth information
+            message = keyrack.create_slack_message(
+                person_name=person_name,
+            )
+            if do_send_slack_msg:
+                slack_message.post_message(message)
+            else:
+                print(message)
+
+        i += 1
+        if i == max_i:
+            i = 0
+        # print(i)
+        # print(count_pressed)
+
+        sleep(sleep_sec)
 
 
 if __name__ == "__main__":
-    kar = KeyAndRpi(do_send_slack_msg=False)
-    kar.main()
+    main(do_send_slack_msg=False)
