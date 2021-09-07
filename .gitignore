@@ -15,3 +15,6 @@ temp*
 
 # Remove template.service
 !template.service
+
+# Setting file
+settings.cfg
