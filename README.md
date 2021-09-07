@@ -15,11 +15,12 @@ pip install -r requirements.txt
 
 ### Save Slack Token and Channel ID
 
-Create `slack_bot_token.py`.
+Create `settings.cfg` from `settings.org.cfg`.
 
-```python:slack_bot_token.py
-SLACK_BOT_TOKEN = "hoge"
-CHANNEL_ID = "foo"
+```ini:settings.cfg
+[SLACK]
+SLACK_BOT_TOKEN = <Your Slack Bot Token>
+CHANNEL_ID = <Your Channel ID>
 ```
 
 ### Setup service
