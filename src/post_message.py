@@ -5,9 +5,12 @@ from slack_sdk.errors import SlackApiError
 
 
 class SlackMessage:
-    def __init__(self, token: str, channel_id: str) -> None:
+    def __init__(
+        self, token: str, channel_id: str,
+        logger: logging.getLogger
+    ) -> None:
         self.client = WebClient(token=token)
-        self.logger = logging.getLogger(__name__)
+        self.logger = logger
         self.channel_id = channel_id
 
     def post_message(self, text: str):
@@ -24,6 +27,11 @@ class SlackMessage:
 
 
 if __name__ == "__main__":
-    from slack_bot_token import SLACK_BOT_TOKEN, CHANNEL_ID
-    sm = SlackMessage(SLACK_BOT_TOKEN, CHANNEL_ID)
+    from read_settings import SMART_KEY_BOX_SETTINGS
+    logger = logging.getLogger(__name__)
+    sm = SlackMessage(
+        SMART_KEY_BOX_SETTINGS["SLACK"]["SLACK_BOT_TOKEN"],
+        SMART_KEY_BOX_SETTINGS["SLACK"]["CHANNEL_ID"],
+        logger,
+    )
     sm.post_message(text="Hello world")

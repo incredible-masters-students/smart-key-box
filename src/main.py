@@ -1,10 +1,11 @@
 import statistics
 from time import sleep
+import logging
 
 from gpiozero import Button
 
 from post_message import SlackMessage
-from slack_bot_token import SLACK_BOT_TOKEN, CHANNEL_ID
+from read_settings import SMART_KEY_BOX_SETTINGS
 
 
 def main(do_send_slack_msg: bool) -> None:
@@ -12,7 +13,11 @@ def main(do_send_slack_msg: bool) -> None:
     threshold_rate = 0.8  # has_keyを切り替えるしきい値
     max_i = 10
 
-    slack_message = SlackMessage(SLACK_BOT_TOKEN, CHANNEL_ID)
+    slack_message = SlackMessage(
+        SMART_KEY_BOX_SETTINGS["SLACK"]["SLACK_BOT_TOKEN"],
+        SMART_KEY_BOX_SETTINGS["SLACK"]["CHANNEL_ID"],
+        logger,
+    )
     keyracks_list = [
         KeyRack(keyrack_gpio=2, keyrack_name="keyrack_2", max_i=max_i)
     ]
