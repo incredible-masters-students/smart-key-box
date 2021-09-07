@@ -1,5 +1,5 @@
 [Unit]
-Description = test
+Description=Smart Key Box
 
 [Service]
 ExecStart=/home/pi/key-and-rpi/.env/bin/python3 /home/pi/key-and-rpi/service_test.py

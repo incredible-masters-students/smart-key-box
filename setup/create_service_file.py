@@ -2,10 +2,13 @@ import configparser
 from pathlib import Path
 
 
-def main(main_script_basename: str) -> None:
-    PROJ_DIR = Path(__file__).parent
-    TEMPLATE_SERVICE_FILENAME = PROJ_DIR / "template.service"
-    DST_SERVICE_FILENAME = PROJ_DIR / main_script_basename
+def main() -> None:
+    MAIN_SCRIPT_BASENAME = "smart_key_box.service"
+
+    SETUP_DIR = Path(__file__).parent
+    PROJ_DIR = SETUP_DIR.parent
+    TEMPLATE_SERVICE_FILENAME = SETUP_DIR / "template.service"
+    DST_SERVICE_FILENAME = SETUP_DIR / MAIN_SCRIPT_BASENAME
 
     VENV_FILENAME = PROJ_DIR / ".env" / "bin" / "python3"
     MAIN_PY_FILENAME = PROJ_DIR / "main.py"
@@ -21,4 +24,4 @@ def main(main_script_basename: str) -> None:
 
 
 if __name__ == "__main__":
-    main(main_script_basename="key_and_rpi.service")
+    main()
