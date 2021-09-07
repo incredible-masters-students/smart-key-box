@@ -27,8 +27,8 @@ CHANNEL_ID = "foo"
 Create `key_and_rpi.service`.
 
 ```bash:create_key_and_rpi.service
-python3 create_service_file.py && \
-sudo cp key_and_rpi.service /lib/systemd/system/
+python3 setup/create_service_file.py && \
+sudo cp setup/smart_key_box.service /lib/systemd/system/
 ```
 
 Run command as follows.

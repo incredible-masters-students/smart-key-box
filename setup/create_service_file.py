@@ -11,7 +11,7 @@ def main() -> None:
     DST_SERVICE_FILENAME = SETUP_DIR / MAIN_SCRIPT_BASENAME
 
     VENV_FILENAME = PROJ_DIR / ".env" / "bin" / "python3"
-    MAIN_PY_FILENAME = PROJ_DIR / "main.py"
+    MAIN_PY_FILENAME = PROJ_DIR / "src" / "main.py"
 
     config = configparser.ConfigParser()
     config.optionxform = str
