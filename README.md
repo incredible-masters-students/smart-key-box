@@ -35,8 +35,8 @@ sudo cp setup/smart_key_box.service /lib/systemd/system/
 Run command as follows.
 
 ```bash:setup-service
-sudo systemctl start key_and_rpi.service  # Start service
-sudo systemctl stop key_and_rpi.service　 # Stop service
-sudo systemctl enable key_and_rpi.service   # Enable service start at boot
-sudo systemctl disable key_and_rpi.service　 # Disable service start at boot
+sudo systemctl start smart_key_box.service  # Start service
+sudo systemctl stop smart_key_box.service　 # Stop service
+sudo systemctl enable smart_key_box.service   # Enable service start at boot
+sudo systemctl disable smart_key_box.service　 # Disable service start at boot
 ```
