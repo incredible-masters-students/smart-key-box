@@ -1,7 +1,7 @@
 import statistics
 from time import sleep
 
-from gpiozero import Button
+from gpiozero import Button, LED
 
 from post_message import SlackMessage
 from read_settings import SMART_KEY_BOX_SETTINGS, PROJ_DIR
@@ -22,7 +22,10 @@ def main(do_send_slack_msg: bool) -> None:
         logger.getChild("post_message.py"),
     )
     keyracks_list = [
-        KeyRack(keyrack_gpio=2, keyrack_name="keyrack_2", max_i=max_i)
+        KeyRack(
+            keyrack_gpio=27, led_gpio=17,
+            keyrack_name="keyrack_2", max_i=max_i
+        )
     ]
 
     i = 0
@@ -72,11 +75,12 @@ def main(do_send_slack_msg: bool) -> None:
 
 class KeyRack:
     def __init__(
-        self, keyrack_gpio: int,
+        self, keyrack_gpio: int, led_gpio: int,
         keyrack_name: str,
         max_i: int
     ) -> None:
         self.keyrack_button = Button(keyrack_gpio)
+        self.led = LED(led_gpio)
         self.keyrack_name = keyrack_name
 
         self.count_pressed = [0 for _ in range(max_i)]
@@ -85,8 +89,10 @@ class KeyRack:
     def create_slack_message(self, person_name: str) -> str:
         if self.has_key is True:
             removed_or_placed = "placed"
+            self.led.on()
         else:
             removed_or_placed = "removed"
+            self.led.off()
         message = (
             f"{person_name} {removed_or_placed} the key: "
             f"{self.keyrack_name}."
