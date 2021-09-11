@@ -61,9 +61,20 @@ def main(do_send_slack_msg: bool) -> None:
             # has_keyが変わった場合は，
             # Bluetooth情報の受信とSlackへの送信を行う．
             person_name = "Alice"  # Get bluetooth information
-            message = keyrack.create_slack_message(
-                person_name=person_name,
+
+            # messageを生成し，LEDを点灯 or 消灯させる
+            if keyrack.has_key is True:
+                removed_or_placed = "placed"
+                keyrack.led.on()
+            else:
+                removed_or_placed = "removed"
+                keyrack.led.off()
+            message = (
+                f"{person_name} {removed_or_placed} the key: "
+                f"{keyrack.keyrack_name}."
             )
+
+            # Slackへの投稿とlogの記録を行う
             if do_send_slack_msg:
                 slack_message.post_message(message)
             logger.info(message)
@@ -89,19 +100,6 @@ class KeyRack:
 
         self.count_pressed = [0 for _ in range(max_i)]
         self.has_key = True
-
-    def create_slack_message(self, person_name: str) -> str:
-        if self.has_key is True:
-            removed_or_placed = "placed"
-            self.led.on()
-        else:
-            removed_or_placed = "removed"
-            self.led.off()
-        message = (
-            f"{person_name} {removed_or_placed} the key: "
-            f"{self.keyrack_name}."
-        )
-        return message
 
 
 if __name__ == "__main__":
