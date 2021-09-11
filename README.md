@@ -10,7 +10,7 @@ Run command as follows.
 sudo apt install python3-gpiozero && \
 python3 -m venv .env && \
 source .env/bin/activate && \
-pip install -r requirements.txt
+.env/bin/pip install -r requirements.txt
 ```
 
 ### Save Slack Token and Channel ID
