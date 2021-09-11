@@ -7,7 +7,7 @@ from slack_sdk.errors import SlackApiError
 class SlackMessage:
     def __init__(
         self, token: str, channel_id: str,
-        logger: logging.getLogger
+        logger: logging.Logger
     ) -> None:
         self.client = WebClient(token=token)
         self.logger = logger
