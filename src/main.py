@@ -24,8 +24,12 @@ def main(do_send_slack_msg: bool) -> None:
     keyracks_list = [
         KeyRack(
             keyrack_gpio=27, led_gpio=17,
-            keyrack_name="keyrack_2", max_i=max_i
-        )
+            keyrack_name="keyrack_27", max_i=max_i
+        ),
+        KeyRack(
+            keyrack_gpio=23, led_gpio=22,
+            keyrack_name="keyrack_23", max_i=max_i
+        ),
     ]
 
     i = 0
