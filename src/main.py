@@ -1,7 +1,7 @@
 import statistics
 from time import sleep
 
-from gpiozero import Button
+from gpiozero import Button, LED
 
 from post_message import SlackMessage
 from read_settings import SMART_KEY_BOX_SETTINGS, PROJ_DIR
@@ -22,7 +22,14 @@ def main(do_send_slack_msg: bool) -> None:
         logger.getChild("post_message.py"),
     )
     keyracks_list = [
-        KeyRack(keyrack_gpio=2, keyrack_name="keyrack_2", max_i=max_i)
+        KeyRack(
+            keyrack_gpio=27, led_gpio=17,
+            keyrack_name="keyrack_27", max_i=max_i
+        ),
+        KeyRack(
+            keyrack_gpio=23, led_gpio=22,
+            keyrack_name="keyrack_23", max_i=max_i
+        ),
     ]
 
     i = 0
@@ -54,9 +61,20 @@ def main(do_send_slack_msg: bool) -> None:
             # has_keyが変わった場合は，
             # Bluetooth情報の受信とSlackへの送信を行う．
             person_name = "Alice"  # Get bluetooth information
-            message = keyrack.create_slack_message(
-                person_name=person_name,
+
+            # messageを生成し，LEDを点灯 or 消灯させる
+            if keyrack.has_key is True:
+                removed_or_placed = "placed"
+                keyrack.led.on()
+            else:
+                removed_or_placed = "removed"
+                keyrack.led.off()
+            message = (
+                f"{person_name} {removed_or_placed} the key: "
+                f"{keyrack.keyrack_name}."
             )
+
+            # Slackへの投稿とlogの記録を行う
             if do_send_slack_msg:
                 slack_message.post_message(message)
             logger.info(message)
@@ -72,26 +90,16 @@ def main(do_send_slack_msg: bool) -> None:
 
 class KeyRack:
     def __init__(
-        self, keyrack_gpio: int,
+        self, keyrack_gpio: int, led_gpio: int,
         keyrack_name: str,
         max_i: int
     ) -> None:
         self.keyrack_button = Button(keyrack_gpio)
+        self.led = LED(led_gpio)
         self.keyrack_name = keyrack_name
 
         self.count_pressed = [0 for _ in range(max_i)]
         self.has_key = True
-
-    def create_slack_message(self, person_name: str) -> str:
-        if self.has_key is True:
-            removed_or_placed = "placed"
-        else:
-            removed_or_placed = "removed"
-        message = (
-            f"{person_name} {removed_or_placed} the key: "
-            f"{self.keyrack_name}."
-        )
-        return message
 
 
 if __name__ == "__main__":
