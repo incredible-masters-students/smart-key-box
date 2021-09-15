@@ -1,5 +1,6 @@
 import statistics
 from time import sleep
+from argparse import ArgumentParser
 
 from gpiozero import Button, LED
 
@@ -8,10 +9,21 @@ from read_settings import SMART_KEY_BOX_SETTINGS, PROJ_DIR
 from create_logger import create_logger
 
 
-def main(do_send_slack_msg: bool) -> None:
-    sleep_sec = 0.1
-    threshold_rate = 0.8  # has_keyを切り替えるしきい値
-    max_i = 10
+def main() -> None:
+    # 引数を解析し，Slackにて送信するか決定する
+    parser = ArgumentParser(description="Smart Key Box")
+    parser.add_argument(
+        "--do-post-slack-message", "-p",
+        action="store_true",
+        help="Post messege to Slack or do not it for debug",
+    )
+    args = parser.parse_args()
+    do_post_slack_message = args.do_post_slack_message
+
+    # 定数・変数の初期化を行う
+    SLEEP_SEC = 0.1
+    THRESHOLD_RATE = 0.8  # has_keyを切り替えるしきい値
+    MAX_I = 10
 
     LOG_FILENAME = PROJ_DIR / "smart_key_box.log"
     logger = create_logger("main.py", LOG_FILENAME)
@@ -24,18 +36,19 @@ def main(do_send_slack_msg: bool) -> None:
     keyracks_list = [
         KeyRack(
             keyrack_gpio=26, led_gpio=16,
-            keyrack_name="keyrack_red", max_i=max_i
+            keyrack_name="keyrack_red", max_i=MAX_I
         ),
         KeyRack(
             keyrack_gpio=6, led_gpio=25,
-            keyrack_name="keyrack_yello", max_i=max_i
+            keyrack_name="keyrack_yello", max_i=MAX_I
         ),
         KeyRack(
             keyrack_gpio=23, led_gpio=27,
-            keyrack_name="keyrack_green", max_i=max_i
+            keyrack_name="keyrack_green", max_i=MAX_I
         ),
     ]
 
+    # ループを実行する
     i = 0
     while True:
         for keyrack in keyracks_list:
@@ -50,12 +63,12 @@ def main(do_send_slack_msg: bool) -> None:
 
             # 鍵が外されたと判定した場合，has_keyをFalseにする．
             if keyrack.has_key is True and \
-                    avg_count_pressed < (1 - threshold_rate):
+                    avg_count_pressed < (1 - THRESHOLD_RATE):
                 keyrack.has_key = False
 
             # 鍵が付けられたと判定した場合，has_keyをTrueにする．
             elif keyrack.has_key is False and \
-                    avg_count_pressed > threshold_rate:
+                    avg_count_pressed > THRESHOLD_RATE:
                 keyrack.has_key = True
 
             # has_keyが変わらない場合，continueする．
@@ -79,16 +92,16 @@ def main(do_send_slack_msg: bool) -> None:
             )
 
             # Slackへの投稿とlogの記録を行う
-            if do_send_slack_msg:
+            if do_post_slack_message:
                 slack_message.post_message(message)
             logger.info(message)
 
         # iを更新する
         i += 1
-        if i == max_i:
+        if i == MAX_I:
             i = 0
 
-        sleep(sleep_sec)
+        sleep(SLEEP_SEC)
 
 
 class KeyRack:
@@ -115,4 +128,4 @@ class KeyRack:
 
 
 if __name__ == "__main__":
-    main(do_send_slack_msg=False)
+    main()

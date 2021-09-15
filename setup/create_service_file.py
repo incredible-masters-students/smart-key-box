@@ -12,12 +12,13 @@ def main() -> None:
 
     VENV_FILENAME = PROJ_DIR / ".env" / "bin" / "python3"
     MAIN_PY_FILENAME = PROJ_DIR / "src" / "main.py"
+    FLAG = "--do-post-slack-message"
 
     config = configparser.ConfigParser()
     config.optionxform = str
     config.sections()
     config.read(TEMPLATE_SERVICE_FILENAME)
-    config["Service"]["ExecStart"] = f"{VENV_FILENAME} {MAIN_PY_FILENAME}"
+    config["Service"]["ExecStart"] = f"{VENV_FILENAME} {MAIN_PY_FILENAME} {FLAG}"
 
     with DST_SERVICE_FILENAME.open('w') as configfile:
         config.write(configfile)
