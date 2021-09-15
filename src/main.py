@@ -23,12 +23,16 @@ def main(do_send_slack_msg: bool) -> None:
     )
     keyracks_list = [
         KeyRack(
-            keyrack_gpio=27, led_gpio=17,
-            keyrack_name="keyrack_27", max_i=max_i
+            keyrack_gpio=26, led_gpio=16,
+            keyrack_name="keyrack_red", max_i=max_i
         ),
         KeyRack(
-            keyrack_gpio=23, led_gpio=22,
-            keyrack_name="keyrack_23", max_i=max_i
+            keyrack_gpio=6, led_gpio=25,
+            keyrack_name="keyrack_yello", max_i=max_i
+        ),
+        KeyRack(
+            keyrack_gpio=23, led_gpio=27,
+            keyrack_name="keyrack_green", max_i=max_i
         ),
     ]
 
@@ -65,10 +69,10 @@ def main(do_send_slack_msg: bool) -> None:
             # messageを生成し，LEDを点灯 or 消灯させる
             if keyrack.has_key is True:
                 removed_or_placed = "placed"
-                keyrack.led.on()
+                keyrack.led.blink(on_time=0.1, off_time=0.1, n=2)
             else:
                 removed_or_placed = "removed"
-                keyrack.led.off()
+                keyrack.led.blink(on_time=0.1, off_time=0.1, n=1)
             message = (
                 f"{person_name} {removed_or_placed} the key: "
                 f"{keyrack.keyrack_name}."
