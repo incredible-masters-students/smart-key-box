@@ -66,7 +66,7 @@ def main(do_send_slack_msg: bool) -> None:
             # Bluetooth情報の受信とSlackへの送信を行う．
             person_name = "Alice"  # Get bluetooth information
 
-            # messageを生成し，LEDを点灯 or 消灯させる
+            # messageを生成し，LEDを点滅させる
             if keyrack.has_key is True:
                 removed_or_placed = "placed"
                 keyrack.led.blink(on_time=0.1, off_time=0.1, n=2)
@@ -83,11 +83,10 @@ def main(do_send_slack_msg: bool) -> None:
                 slack_message.post_message(message)
             logger.info(message)
 
+        # iを更新する
         i += 1
         if i == max_i:
             i = 0
-        # print(i)
-        # print(count_pressed)
 
         sleep(sleep_sec)
 
