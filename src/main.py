@@ -98,12 +98,21 @@ class KeyRack:
         keyrack_name: str,
         max_i: int
     ) -> None:
+        # ボタンとLEDを生成する
         self.keyrack_button = Button(keyrack_gpio)
         self.led = LED(led_gpio)
+
+        # キーラック名を生成する
         self.keyrack_name = keyrack_name
 
-        self.count_pressed = [0 for _ in range(max_i)]
-        self.has_key = True
+        # キーラックの初期状態を判定する
+        temp_has_key = False
+        if self.keyrack_button.is_pressed:
+            temp_has_key = True
+
+        # カウント用のリストとキーラックの状態の変数を生成する
+        self.count_pressed = [int(temp_has_key) for _ in range(max_i)]
+        self.has_key = temp_has_key
 
 
 if __name__ == "__main__":
