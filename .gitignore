@@ -15,6 +15,7 @@ temp*
 
 # Setting file
 settings.cfg
+bluetooth_addresses.csv
 
 # Log file
 smart_key_box.log
