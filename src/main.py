@@ -7,6 +7,7 @@ from gpiozero import Button, LED
 from post_message import SlackMessage
 from read_settings import SMART_KEY_BOX_SETTINGS, PROJ_DIR
 from create_logger import create_logger
+from get_bluetooth_info import SmartphoneBluetoothInformation
 
 
 def main() -> None:
@@ -28,6 +29,9 @@ def main() -> None:
     LOG_FILENAME = PROJ_DIR / "smart_key_box.log"
     logger = create_logger("main.py", LOG_FILENAME)
 
+    sp_ble_info = SmartphoneBluetoothInformation(
+        logger=logger.getChild("get_bluetooth_info.py")
+    )
     slack_message = SlackMessage(
         SMART_KEY_BOX_SETTINGS["SLACK"]["SLACK_BOT_TOKEN"],
         SMART_KEY_BOX_SETTINGS["SLACK"]["CHANNEL_ID"],
@@ -57,6 +61,7 @@ def main() -> None:
             else:
                 keyrack.count_pressed[i] = 0
 
+        changed_keyrack_list = []
         for keyrack in keyracks_list:
             # count_pressedの平均値を取得する．
             avg_count_pressed = statistics.mean(keyrack.count_pressed)
@@ -75,10 +80,6 @@ def main() -> None:
             else:
                 continue
 
-            # has_keyが変わった場合は，
-            # Bluetooth情報の受信とSlackへの送信を行う．
-            person_name = "Alice"  # Get bluetooth information
-
             # messageを生成し，LEDを点滅させる
             if keyrack.has_key is True:
                 removed_or_placed = "placed"
@@ -86,10 +87,31 @@ def main() -> None:
             else:
                 removed_or_placed = "removed"
                 keyrack.led.blink(on_time=0.1, off_time=0.1, n=1)
-            message = (
-                f"{person_name} {removed_or_placed} the key: "
-                f"{keyrack.keyrack_name}."
-            )
+            changed_keyrack_list.append({
+                "removed_or_placed": removed_or_placed,
+                "name": keyrack.keyrack_name,
+            })
+
+        if len(changed_keyrack_list) != 0:
+            persons_name = ""
+            persons_around_rpi =\
+                sp_ble_info.get_bluetooth_info()
+            if len(persons_around_rpi) != 0:
+                for person_name in persons_around_rpi:
+                    persons_name += f"{person_name}, "
+                persons_name = persons_name[0:-2]
+            else:
+                persons_name = "Unkown person"
+
+            message = ""
+            for changed_keyrack in changed_keyrack_list:
+                # has_keyが変わった場合は，
+                # Bluetooth情報の受信とSlackへの送信を行う．
+                message += (
+                    f"{persons_name} {changed_keyrack['removed_or_placed']}"
+                    " the key: "
+                    f"{changed_keyrack['name']}. "
+                )
 
             # Slackへの投稿とlogの記録を行う
             if do_post_slack_message:
