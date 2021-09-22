@@ -10,7 +10,8 @@ def main() -> None:
     TEMPLATE_SERVICE_FILENAME = SETUP_DIR / "template.service"
     DST_SERVICE_FILENAME = SETUP_DIR / MAIN_SCRIPT_BASENAME
 
-    VENV_FILENAME = PROJ_DIR / ".env" / "bin" / "python3"
+    # PYTHON_PATH = PROJ_DIR / ".env" / "bin" / "python3"
+    PYTHON_PATH = "/usr/bin/python3"
     MAIN_PY_FILENAME = PROJ_DIR / "src" / "main.py"
     FLAG = "--do-post-slack-message"
 
@@ -18,7 +19,7 @@ def main() -> None:
     config.optionxform = str
     config.sections()
     config.read(TEMPLATE_SERVICE_FILENAME)
-    config["Service"]["ExecStart"] = f"{VENV_FILENAME} {MAIN_PY_FILENAME} {FLAG}"
+    config["Service"]["ExecStart"] = f"{PYTHON_PATH} {MAIN_PY_FILENAME} {FLAG}"
 
     with DST_SERVICE_FILENAME.open('w') as configfile:
         config.write(configfile)
