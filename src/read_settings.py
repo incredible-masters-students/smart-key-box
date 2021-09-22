@@ -2,7 +2,7 @@ import configparser
 from pathlib import Path
 
 
-PROJ_DIR = Path(__file__).parent.parent
+PROJ_DIR = Path(__file__).resolve().parent.parent
 SETTINGS_FILENAME = PROJ_DIR / "settings.cfg"
 
 SMART_KEY_BOX_SETTINGS = configparser.ConfigParser()
