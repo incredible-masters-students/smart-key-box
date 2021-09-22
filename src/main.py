@@ -39,16 +39,16 @@ def main() -> None:
     )
     keyracks_list = [
         KeyRack(
-            keyrack_gpio=26, led_gpio=16,
-            keyrack_name="keyrack_red", max_i=MAX_I
+            keyrack_gpio=26, led_gpio=23,
+            keyrack_name="keyrack_left", max_i=MAX_I
         ),
         KeyRack(
-            keyrack_gpio=6, led_gpio=25,
-            keyrack_name="keyrack_yello", max_i=MAX_I
+            keyrack_gpio=16, led_gpio=22,
+            keyrack_name="keyrack_center", max_i=MAX_I
         ),
         KeyRack(
-            keyrack_gpio=23, led_gpio=27,
-            keyrack_name="keyrack_green", max_i=MAX_I
+            keyrack_gpio=6, led_gpio=27,
+            keyrack_name="keyrack_right", max_i=MAX_I
         ),
     ]
 
