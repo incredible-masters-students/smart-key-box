@@ -18,8 +18,14 @@ def main() -> None:
         action="store_true",
         help="Post messege to Slack or do not it for debug",
     )
+    parser.add_argument(
+        "--do-get-bluetooth-information", "-b",
+        action="store_true",
+        help="Get Smartphone bluetooth information or do not it for debug",
+    )
     args = parser.parse_args()
     do_post_slack_message = args.do_post_slack_message
+    get_bluetooth_information = args.get_bluetooth_information
 
     # 定数・変数の初期化を行う
     SLEEP_SEC = 0.1
@@ -29,9 +35,10 @@ def main() -> None:
     LOG_FILENAME = PROJ_DIR / "smart_key_box.log"
     logger = create_logger("main.py", LOG_FILENAME)
 
-    sp_ble_info = SmartphoneBluetoothInformation(
-        logger=logger.getChild("get_bluetooth_info.py")
-    )
+    if get_bluetooth_information:
+        sp_ble_info = SmartphoneBluetoothInformation(
+            logger=logger.getChild("get_bluetooth_info.py")
+        )
     slack_message = SlackMessage(
         SMART_KEY_BOX_SETTINGS["SLACK"]["SLACK_BOT_TOKEN"],
         SMART_KEY_BOX_SETTINGS["SLACK"]["CHANNEL_ID"],
@@ -94,14 +101,17 @@ def main() -> None:
 
         if len(changed_keyrack_list) != 0:
             persons_name = ""
-            persons_around_rpi =\
-                sp_ble_info.get_bluetooth_info()
-            if len(persons_around_rpi) != 0:
-                for person_name in persons_around_rpi:
-                    persons_name += f"{person_name}, "
-                persons_name = persons_name[0:-2]
+            if get_bluetooth_information:
+                persons_around_rpi =\
+                    sp_ble_info.get_bluetooth_info()
+                if len(persons_around_rpi) != 0:
+                    for person_name in persons_around_rpi:
+                        persons_name += f"{person_name}, "
+                    persons_name = persons_name[0:-2]
+                else:
+                    persons_name = "Unkown person"
             else:
-                persons_name = "Unkown person"
+                persons_name = "NO BLUETOOTH DATA"
 
             message = ""
             for changed_keyrack in changed_keyrack_list:

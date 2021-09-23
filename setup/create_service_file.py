@@ -13,7 +13,7 @@ def main() -> None:
     # PYTHON_PATH = PROJ_DIR / ".env" / "bin" / "python3"
     PYTHON_PATH = "/usr/bin/python3"
     MAIN_PY_FILENAME = PROJ_DIR / "src" / "main.py"
-    FLAG = "--do-post-slack-message"
+    FLAG = "--do-post-slack-message --do-get-bluetooth-information"
 
     config = configparser.ConfigParser()
     config.optionxform = str
