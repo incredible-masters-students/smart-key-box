@@ -25,7 +25,7 @@ def main() -> None:
     )
     args = parser.parse_args()
     do_post_slack_message = args.do_post_slack_message
-    get_bluetooth_information = args.get_bluetooth_information
+    do_get_bluetooth_information = args.do_get_bluetooth_information
 
     # 定数・変数の初期化を行う
     SLEEP_SEC = 0.1
@@ -35,7 +35,7 @@ def main() -> None:
     LOG_FILENAME = PROJ_DIR / "smart_key_box.log"
     logger = create_logger("main.py", LOG_FILENAME)
 
-    if get_bluetooth_information:
+    if do_get_bluetooth_information:
         sp_ble_info = SmartphoneBluetoothInformation(
             logger=logger.getChild("get_bluetooth_info.py")
         )
@@ -63,12 +63,15 @@ def main() -> None:
     i = 0
     while True:
         for keyrack in keyracks_list:
+            # チャタリングを防ぐために最新のMAX_I個の判定情報を記録する
             if keyrack.keyrack_button.is_pressed:
                 keyrack.count_pressed[i] = 1
             else:
                 keyrack.count_pressed[i] = 0
 
-        changed_keyrack_list = []
+        # 戻された鍵と取り外された鍵の名前を記録する
+        placed_keyname = ""
+        removed_keyname = ""
         for keyrack in keyracks_list:
             # count_pressedの平均値を取得する．
             avg_count_pressed = statistics.mean(keyrack.count_pressed)
@@ -89,19 +92,20 @@ def main() -> None:
 
             # messageを生成し，LEDを点滅させる
             if keyrack.has_key is True:
-                removed_or_placed = "placed"
                 keyrack.led.blink(on_time=0.1, off_time=0.1, n=2)
+                placed_keyname += f"{keyrack.keyrack_name}, "
             else:
-                removed_or_placed = "removed"
+                removed_keyname += f"{keyrack.keyrack_name}, "
                 keyrack.led.blink(on_time=0.1, off_time=0.1, n=1)
-            changed_keyrack_list.append({
-                "removed_or_placed": removed_or_placed,
-                "name": keyrack.keyrack_name,
-            })
 
-        if len(changed_keyrack_list) != 0:
+        if len(placed_keyname) > 0 or len(removed_keyname) > 0:
+            # 文字列末の", "を削除する
+            placed_keyname = placed_keyname[0:-2]
+            removed_keyname = removed_keyname[0:-2]
+
+            # 周囲にいる人を取得する
             persons_name = ""
-            if get_bluetooth_information:
+            if do_get_bluetooth_information:
                 persons_around_rpi =\
                     sp_ble_info.get_bluetooth_info()
                 if len(persons_around_rpi) != 0:
@@ -113,15 +117,20 @@ def main() -> None:
             else:
                 persons_name = "NO BLUETOOTH DATA"
 
-            message = ""
-            for changed_keyrack in changed_keyrack_list:
-                # has_keyが変わった場合は，
-                # Bluetooth情報の受信とSlackへの送信を行う．
-                message += (
-                    f"{persons_name} {changed_keyrack['removed_or_placed']}"
-                    " the key: "
-                    f"{changed_keyrack['name']}. "
-                )
+            # メッセージを作成する
+            message = persons_name
+            if len(placed_keyname) > 0:
+                # 戻された鍵があるとき
+                message += f" placed {{{placed_keyname}}}"
+                if len(removed_keyname) > 0:
+                    # かつ取り外された鍵があるとき
+                    message += f" and removed {{{removed_keyname}}}. "
+                else:
+                    # 取り外された鍵がないとき
+                    message += ". "
+            else:
+                # 取り外された鍵のみがあるとき
+                message += f" removed {{{removed_keyname}}}. "
 
             # Slackへの投稿とlogの記録を行う
             if do_post_slack_message:
