@@ -15,7 +15,6 @@ class SlackMessage:
 
     def post_message(self, text: str):
         try:
-            # Call the chat.postMessage method using the WebClient
             result = self.client.chat_postMessage(
                 channel=self.channel_id,
                 text=text

@@ -25,7 +25,6 @@ class SmartphoneBluetoothInformation:
         for name, address in addresses:
             process = {"name": name, "result": (None, None)}
             command_str = f"hcitool name {address}"
-            # command_str = "sleep 10"
             process["popen"] = subprocess.Popen(
                 shlex.split(command_str),
                 encoding='UTF-8',
