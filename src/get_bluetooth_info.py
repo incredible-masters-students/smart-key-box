@@ -2,7 +2,6 @@ import subprocess
 import csv
 import logging
 import shlex
-from time import sleep
 
 from read_settings import PROJ_DIR
 
